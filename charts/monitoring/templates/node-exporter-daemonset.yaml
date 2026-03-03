@@ -1,0 +1,57 @@
+{{- if .Values.nodeExporter.enabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ .Release.Name }}-node-exporter
+  labels:
+    {{- include "monitoring.labels" (dict "root" . "component" "node-exporter") | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "monitoring.labels" (dict "root" . "component" "node-exporter") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "monitoring.labels" (dict "root" . "component" "node-exporter") | nindent 8 }}
+    spec:
+      hostNetwork: true
+      hostPID: true
+      tolerations:
+        - operator: Exists
+      containers:
+        - name: node-exporter
+          image: {{ include "monitoring.image" (dict "root" . "component" .Values.nodeExporter) }}
+          imagePullPolicy: {{ .Values.nodeExporter.image.pullPolicy }}
+          args:
+            - --path.procfs=/host/proc
+            - --path.sysfs=/host/sys
+            - --path.rootfs=/host/root
+            - --no-collector.wifi
+            - --no-collector.hwmon
+          ports:
+            - name: metrics
+              containerPort: 9100
+          volumeMounts:
+            - name: proc
+              mountPath: /host/proc
+              readOnly: true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+            - name: root
+              mountPath: /host/root
+              readOnly: true
+          {{- with .Values.nodeExporter.resources }}
+          resources: {{- toJson . | nindent 10 }}
+          {{- end }}
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
+        - name: root
+          hostPath:
+            path: /
+{{- end }}

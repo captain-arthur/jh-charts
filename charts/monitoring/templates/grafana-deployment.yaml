@@ -1,0 +1,54 @@
+{{- if .Values.grafana.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-grafana
+  labels:
+    {{- include "monitoring.labels" (dict "root" . "component" "grafana") | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "monitoring.labels" (dict "root" . "component" "grafana") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "monitoring.labels" (dict "root" . "component" "grafana") | nindent 8 }}
+    spec:
+      containers:
+        - name: grafana
+          image: {{ include "monitoring.image" (dict "root" . "component" .Values.grafana) }}
+          imagePullPolicy: {{ .Values.grafana.image.pullPolicy }}
+          env:
+            - name: GF_SECURITY_ADMIN_USER
+              value: admin
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-grafana
+                  key: admin-password
+            - name: GF_USERS_ALLOW_SIGN_UP
+              value: "false"
+            - name: GF_SERVER_ROOT_URL
+              value: "%(protocol)s://%(domain)s/"
+          ports:
+            - name: http
+              containerPort: 3000
+          volumeMounts:
+            - name: datasource
+              mountPath: /etc/grafana/provisioning/datasources
+              readOnly: true
+            - name: dashboards
+              mountPath: /etc/grafana/provisioning/dashboards
+              readOnly: true
+          {{- with .Values.grafana.resources }}
+          resources: {{- toJson . | nindent 10 }}
+          {{- end }}
+      volumes:
+        - name: datasource
+          configMap:
+            name: {{ .Release.Name }}-grafana-datasource
+        - name: dashboards
+          configMap:
+            name: {{ .Release.Name }}-grafana-dashboards
+{{- end }}

@@ -1,0 +1,11 @@
+apiVersion: 1
+providers:
+  - name: "default"
+    orgId: 1
+    folder: "Monitoring"
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      # 프로비저닝 마운트 루트와 동일. YAML은 provider로, JSON은 대시보드로 로드됨
+      path: /etc/grafana/provisioning/dashboards

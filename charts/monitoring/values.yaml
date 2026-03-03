@@ -1,0 +1,46 @@
+# 이미지 설정: 모든 컴포넌트에 동일 패턴 적용
+# - registry: 폐쇄망용 사설 레지스트리 (예: registry.example.com:5000). 비우면 공개 레지스트리 사용
+# - repository: 이미지 저장소 경로
+# - tag: 이미지 태그
+# 폐쇄망: registry에 사설 레지스트리 지정 후, 해당 레지스트리에 이미지만 미리 푸시하면 배포 가능
+
+global:
+  imageRegistry: ""   # 모든 컴포넌트 공통 레지스트리 (개별 설정보다 우선)
+
+prometheus:
+  enabled: true
+  image:
+    registry: ""
+    repository: prom/prometheus
+    tag: "v2.47.0"
+    pullPolicy: IfNotPresent
+  resources: {}
+  # retention: 15d   # 필요 시 활성화 (경량 목적이면 기본 15d 또는 비활성화)
+
+nodeExporter:
+  enabled: true
+  image:
+    registry: ""
+    repository: prom/node-exporter
+    tag: "v1.6.1"
+    pullPolicy: IfNotPresent
+  resources: {}
+
+kubeStateMetrics:
+  enabled: true
+  image:
+    registry: ""
+    repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
+    tag: "v2.10.1"
+    pullPolicy: IfNotPresent
+  resources: {}
+
+grafana:
+  enabled: true
+  image:
+    registry: ""
+    repository: grafana/grafana
+    tag: "10.2.2"
+    pullPolicy: IfNotPresent
+  resources: {}
+  adminPassword: "admin"   # 테스트용. 배포 후 반드시 변경 권장

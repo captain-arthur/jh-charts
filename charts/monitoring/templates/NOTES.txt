@@ -1,0 +1,10 @@
+모니터링 스택이 배포되었습니다.
+
+접속 방법 (클러스터 내부 또는 port-forward):
+  Prometheus: http://{{ .Release.Name }}-prometheus:9090
+  Grafana:    http://{{ .Release.Name }}-grafana:3000  (기본 계정: admin / values.yaml의 grafana.adminPassword)
+
+Grafana 접속 후 Explore에서 Prometheus 데이터소스로 메트릭 조회 가능합니다.
+테스트용 클러스터에서는 아래로 포트포워드 후 브라우저 접속:
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ .Release.Name }}-grafana 3000:3000
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ .Release.Name }}-prometheus 9090:9090

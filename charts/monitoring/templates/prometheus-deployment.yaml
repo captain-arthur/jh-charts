@@ -1,0 +1,40 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-prometheus
+  labels:
+    {{- include "monitoring.labels" (dict "root" . "component" "prometheus") | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "monitoring.labels" (dict "root" . "component" "prometheus") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "monitoring.labels" (dict "root" . "component" "prometheus") | nindent 8 }}
+    spec:
+      serviceAccountName: default
+      containers:
+        - name: prometheus
+          image: {{ include "monitoring.image" (dict "root" . "component" .Values.prometheus) }}
+          imagePullPolicy: {{ .Values.prometheus.image.pullPolicy }}
+          args:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.path=/prometheus
+            - --web.enable-lifecycle
+          ports:
+            - name: http
+              containerPort: 9090
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
+          {{- with .Values.prometheus.resources }}
+          resources: {{- toJson . | nindent 10 }}
+          {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Release.Name }}-prometheus
+{{- end }}

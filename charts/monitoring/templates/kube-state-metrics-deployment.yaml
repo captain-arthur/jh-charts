@@ -1,0 +1,29 @@
+{{- if .Values.kubeStateMetrics.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-kube-state-metrics
+  labels:
+    {{- include "monitoring.labels" (dict "root" . "component" "kube-state-metrics") | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "monitoring.labels" (dict "root" . "component" "kube-state-metrics") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "monitoring.labels" (dict "root" . "component" "kube-state-metrics") | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}-kube-state-metrics
+      containers:
+        - name: kube-state-metrics
+          image: {{ include "monitoring.image" (dict "root" . "component" .Values.kubeStateMetrics) }}
+          imagePullPolicy: {{ .Values.kubeStateMetrics.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+          {{- with .Values.kubeStateMetrics.resources }}
+          resources: {{- toJson . | nindent 10 }}
+          {{- end }}
+{{- end }}

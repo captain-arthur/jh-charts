@@ -1,0 +1,13 @@
+{{- if .Values.grafana.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-grafana-dashboards
+  labels:
+    {{- include "monitoring.labels" (dict "root" . "component" "grafana") | nindent 4 }}
+data:
+  default.yaml: |
+    {{- .Files.Get "dashboards/provider.yaml" | nindent 4 }}
+  monitoring.json: |
+    {{- .Files.Get "dashboards/monitoring.json" | nindent 4 }}
+{{- end }}

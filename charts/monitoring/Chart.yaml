@@ -1,0 +1,7 @@
+apiVersion: v2
+name: monitoring
+description: 경량 모니터링 스택 (Prometheus, node-exporter, kube-state-metrics, Grafana). 이미지 저장소/버전 변경 및 폐쇄망 배포에 적합합니다.
+type: application
+version: 0.1.0
+appVersion: "1"
+kubeVersion: ">=1.21.0"
